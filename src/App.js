@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-import { AiOutlineDelete } from "react-icons/ai";
+import { AiOutlineDelete, AiOutlineEdit, AiOutlineSave } from "react-icons/ai";
 import { BsCheckLg } from "react-icons/bs";
 
 function App() {
   const [allTodos, setAllTodos] = useState([]);
   const [newTodoTitle, setNewTodoTitle] = useState("");
   const [newTodo, setNewTodo] = useState({});
-  const [selectedCategory, setSelectedCategory] = useState("Work");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [editIndex, setEditIndex] = useState(-1);
+  const [editMode, setEditMode] = useState(false);
+
 
   useEffect(() => {
     let savedTodos = JSON.parse(localStorage.getItem("todolist"));
@@ -17,20 +20,29 @@ function App() {
   }, []);
 
   const handleAddNewToDo = () => {
-    const newToDoObj = {
-      title: newTodoTitle,
-      status: newTodo.status,
-      category: selectedCategory,
-    };
-    const updatedTodoArr = [...allTodos];
-    updatedTodoArr.push(newToDoObj);
-    setAllTodos(updatedTodoArr);
-    localStorage.setItem("todolist", JSON.stringify(updatedTodoArr));
+    if (editMode) {
+      const updatedTodos = [...allTodos];
+      updatedTodos[editIndex] = {
+        title: newTodoTitle,
+        status: newTodo.status,
+        category: selectedCategory,
+      };
+      setAllTodos(updatedTodos);
+      setEditMode(false);
+    } else {
+      const newToDoObj = {
+        title: newTodoTitle,
+        status: newTodo.status,
+        category: selectedCategory,
+      };
+      const updatedTodoArr = [...allTodos];
+      updatedTodoArr.push(newToDoObj);
+      setAllTodos(updatedTodoArr);
+    }
     setNewTodoTitle("");
-    setNewTodo({
-      title: "",
-      status: "Not Started",
-    });
+    setNewTodo({ status: "Not Started" });
+    setSelectedCategory("");
+    localStorage.setItem("todolist", JSON.stringify(allTodos));
   };
 
   const handleDeleteTodo = (index) => {
@@ -53,6 +65,15 @@ function App() {
     updatedTodos[index].status = "Completed";
     setAllTodos(updatedTodos);
     localStorage.setItem("todolist", JSON.stringify(updatedTodos));
+  };
+
+  const handleEditTodo = (index) => {
+    setEditIndex(index);
+    setEditMode(true);
+    const selectedTodo = allTodos[index];
+    setNewTodoTitle(selectedTodo.title);
+    setNewTodo({ status: selectedTodo.status });
+    setSelectedCategory(selectedTodo.category);
   };
 
   return (
@@ -82,6 +103,7 @@ function App() {
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
         >
+          <option>Select the Catogary</option>
           <option value="Work">Work</option>
           <option value="Grocery">Grocery</option>
           <option value="School">School</option>
@@ -110,7 +132,7 @@ function App() {
             </div>
             <div>
               <AiOutlineDelete
-                className="icon"
+                className="check-icon"
                 onClick={() => handleDeleteTodo(index)}
               />
               {item.status !== "Completed" && (
@@ -118,6 +140,15 @@ function App() {
                   className="check-icon"
                   onClick={() => handleCompleteTodo(index)}
                 />
+              )}
+
+              {!editMode ? (
+                <AiOutlineEdit
+                  className="check-icon"
+                  onClick={() => handleEditTodo(index)}
+                />
+              ) : (
+                <AiOutlineSave className="check-icon" onClick={handleAddNewToDo} />
               )}
             </div>
           </div>
