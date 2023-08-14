@@ -6,7 +6,9 @@ import { BsCheckLg } from "react-icons/bs";
 function App() {
   const [allTodos, setAllTodos] = useState([]);
   const [newTodoTitle, setNewTodoTitle] = useState("");
-  const [newTodo, setNewTodo] = useState({  });
+  const [newTodo, setNewTodo] = useState({});
+  const [selectedCategory, setSelectedCategory] = useState("Work");
+
   useEffect(() => {
     let savedTodos = JSON.parse(localStorage.getItem("todolist"));
     if (savedTodos) {
@@ -18,20 +20,18 @@ function App() {
     const newToDoObj = {
       title: newTodoTitle,
       status: newTodo.status,
+      category: selectedCategory,
     };
-    // console.log(newToDoObj);
     const updatedTodoArr = [...allTodos];
     updatedTodoArr.push(newToDoObj);
-    // console.log (updatedTodoArr);
     setAllTodos(updatedTodoArr);
     localStorage.setItem("todolist", JSON.stringify(updatedTodoArr));
-    setNewTodoTitle("Task");
+    setNewTodoTitle("");
     setNewTodo({
       title: "",
       status: "Not Started",
     });
   };
-
 
   const handleDeleteTodo = (index) => {
     const deleteTodo = [...allTodos];
@@ -54,6 +54,7 @@ function App() {
     setAllTodos(updatedTodos);
     localStorage.setItem("todolist", JSON.stringify(updatedTodos));
   };
+
   return (
     <div className="todo-wrapper">
       <h1> Todos </h1>
@@ -65,7 +66,7 @@ function App() {
             value={newTodoTitle}
             onChange={(e) => setNewTodoTitle(e.target.value)}
             placeholder="Enter task title"
-          ></input>
+          />
         </div>
         <select
           name="status"
@@ -75,6 +76,16 @@ function App() {
           <option value="Not Started">Not Started</option>
           <option value="In Progress">In Progress</option>
           <option value="Completed">Completed</option>
+        </select>
+        <select
+          name="category"
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+        >
+          <option value="Work">Work</option>
+          <option value="Grocery">Grocery</option>
+          <option value="School">School</option>
+          <option value="Workout">Workout</option>
         </select>
         <div className="todo-input-item">
           <button
@@ -95,13 +106,14 @@ function App() {
             <div>
               <h3>{item.title}</h3>
               <span>Status: {item.status}</span>
+              <p>Category: {item.category}</p>
             </div>
             <div>
               <AiOutlineDelete
                 className="icon"
                 onClick={() => handleDeleteTodo(index)}
               />
-                {item.status !== "Completed" && (
+              {item.status !== "Completed" && (
                 <BsCheckLg
                   className="check-icon"
                   onClick={() => handleCompleteTodo(index)}
